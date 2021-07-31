@@ -1,11 +1,14 @@
 const express = require('express');
 const app = express();
+status  = require('http-status');
+
+require('dotenv').config();
 
 //const Sauce = require('./models/Sauce');
 const User = require('./models/User');
 
 const mongoose = require('mongoose');
-mongoose.connect('mongodb+srv://alexandre:Sandre12@cluster0.jr8rj.mongodb.net/dataSoPekocko?retryWrites=true&w=majority',
+mongoose.connect(process.env.ACCES_MONGOOSE,
 { useNewUrlParser: true,
     useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie !'))
@@ -23,12 +26,7 @@ app.post('/api/auth/signup', (req, res) => {
         ...req.body
     })
     user.save()
-        .then(() => res.status(201).json({ message: 'utilisateur créé'}))
-        .catch((error => res.status(400).json({ error })))
-        /*
-    console.log(req.headers)
-    console.log(req.body.email)
-    res.status(201).send('hello post')
-    */
+        .then(() => res.status(status.CREATED).json({ message: 'utilisateur créé'}))
+        .catch((error => res.status(status.BAD_REQUEST).json({ error })))
 })
 module.exports = app;

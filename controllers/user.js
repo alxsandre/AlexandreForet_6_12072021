@@ -1,5 +1,6 @@
 status  = require('http-status');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const User = require('../models/User');
 
@@ -13,14 +14,31 @@ exports.signup = (req, res) => {
             user.save()
                 .then(() => res.status(status.CREATED).json({ message: 'utilisateur créé'}))
                 .catch((error => res.status(status.BAD_REQUEST).json({ error })))
-        });
+        })
+        .catch(error => res.status(status.INTERNAL_SERVER_ERROR).json({ error }));
 };
 
 exports.login = (req, res) => {
-    const user = new User({
-        ...req.body
-    })
-    user.save()
-        .then(() => res.status(status.OK).json({ message: 'logué!'}))
-        .catch((error => res.status(status.UNAUTHORIZED).json({ error })))
+    User.findOne({ email: req.body.email })
+        .then(user => {
+            if (!user) {
+                return res.status(status.UNAUTHORIZED).json({ error: 'Utilisateur non trouvé!'})
+            }
+            bcrypt.compare(req.body.password, user.password)
+                .then(valid => {
+                    if (!valid) {
+                        return res.status(status.UNAUTHORIZED).json({ error: 'mot de passe incorrect!'});
+                    }
+                    res.status(status.OK).json({
+                        userId: user._id,
+                        token: jwt.sign(
+                            { userId: user._id },
+                            'RANDOM_TOKEN_SECRET',
+                            { expiresIn: '24h' }
+                        )
+                    });
+                })
+                .catch(error => res.status(status.INTERNAL_SERVER_ERROR).json({ error }))
+        })
+        .catch(error => res.status(status.INTERNAL_SERVER_ERROR).json({ error }))
 };

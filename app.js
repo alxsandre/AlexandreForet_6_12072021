@@ -1,11 +1,11 @@
 const express = require('express');
 const app = express();
+const path = require('path');
 
 require('dotenv').config();
 
 const userRoutes = require('./routes/user');
-
-//const Sauce = require('./models/Sauce');
+const saucesRoutes = require('./routes/sauce');
 
 const mongoose = require('mongoose');
 mongoose.connect(process.env.ACCES_MONGOOSE,
@@ -27,6 +27,9 @@ app.use(express.urlencoded({
   extended: true
 }));
 
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
 app.use('/api/auth', userRoutes);
+app.use('/api/sauces', saucesRoutes);
 
 module.exports = app;

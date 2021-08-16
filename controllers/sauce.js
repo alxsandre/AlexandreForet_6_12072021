@@ -52,9 +52,19 @@ exports.modifyLike = async (req, res, next) => {
 };
 
 exports.modifySauce = async (req, res, next) => {
-    try {const sauceObject = req.file ? {...JSON.parse(req.body.sauce), imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`} : { ...req.body }
-      await Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id})
-      return res.status(status.OK).json({ message: 'Objet modifié!'})
+    try {
+      if (req.file) {
+        const sauceObject = {...JSON.parse(req.body.sauce), imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`};
+        const sauce =  await Sauce.findOne({ _id: req.params.id })
+        const filename = sauce.imageUrl.split('/images/')[1];
+        fs.unlink(`images/${filename}`, async () => {
+          await Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id})
+          return res.status(status.OK).json({ message: 'Objet modifié!'})
+        });
+      } else {
+        await Sauce.updateOne({ _id: req.params.id }, { ...req.body , _id: req.params.id})
+        return res.status(status.OK).json({ message: 'Objet modifié!'})
+      }
     } catch (error) {
       return res.status(status.NOT_FOUND).json({ error });
     };

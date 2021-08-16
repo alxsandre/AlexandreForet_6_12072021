@@ -17,7 +17,7 @@ exports.createSauce = async (req, res, next) => {
     return res.status(status.BAD_REQUEST).json({ error })
   }
 };
-
+/*
 exports.modifyLike = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
       .then(sauce => {
@@ -48,6 +48,40 @@ exports.modifyLike = (req, res, next) => {
           .then(() => res.status(status.OK).json({ message: 'Objet modifié!'}))
           .catch(error => res.status(status.NOT_FOUND).json({ error }));
     })   
+};
+*/
+
+exports.modifyLike = async (req, res, next) => {
+  try {
+    const sauce = await Sauce.findOne({ _id: req.params.id });
+    let likes = sauce.likes;
+    let dislikes = sauce.dislikes;
+    let userId = req.body.userId;
+    let usersLiked = sauce.usersLiked;
+    let usersDisliked = sauce.usersDisliked;
+    let userAlreadyLiked = usersLiked.includes(userId);
+    let userAlreadyDisliked = usersDisliked.includes(userId);
+    if (req.body.like === 1 && !userAlreadyLiked) {
+      likes = likes + 1;
+      usersLiked = [...usersLiked, userId];
+    } else if (!req.body.like) {
+      if (userAlreadyLiked) {
+        likes = likes - 1;
+        usersLiked = usersLiked.filter(usersId => usersId !== userId);
+      }
+      if (userAlreadyDisliked) {
+        dislikes = dislikes - 1;
+        usersDisliked = usersDisliked.filter(usersId => usersId !== userId);
+      }
+    } else if (req.body.like === -1 && !userAlreadyDisliked) {
+        dislikes = dislikes + 1;
+        usersDisliked = [...usersDisliked, userId];
+    };
+    await Sauce.updateOne({ _id: req.params.id }, { likes, dislikes,  usersLiked, usersDisliked, _id: req.params.id})
+    return res.status(status.OK).json({ message: 'Objet modifié!'});
+  } catch (error) {
+    return res.status(status.NOT_FOUND).json({ error });
+  };
 };
 
 exports.modifySauce = (req, res, next) => {

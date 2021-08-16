@@ -12,11 +12,4 @@ router.delete('/:id', auth, sauceController.deleteSauce);
 router.get('/:id', auth, sauceController.getOneSauce);
 router.get('/', auth, sauceController.getAllSauces);
 
-/*
-router.post('/', auth, multer, stuffCtrl.createThing);
-router.put('/:id', auth, multer, stuffCtrl.modifyThing);
-router.delete('/:id', auth, stuffCtrl.deleteThing);
-router.get('/sauces', auth, stuffCtrl.getOneThing);
-router.get('/', auth, stuffCtrl.getAllThings);
-*/
 module.exports = router;

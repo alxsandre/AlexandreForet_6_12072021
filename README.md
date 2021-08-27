@@ -1,8 +1,8 @@
 # Project 6 : Sopekocko (API - Back-end)
 
-## Node Version advised
+## Stack advised
 - [NodeJS](https://nodejs.org) 14.17.5
-- [ExpressJS](https://expressjs.com/fr/)4.17.1
+- [ExpressJS](https://expressjs.com/fr/) 4.17.1
 
 ## Command to clone the client project:
 ```shell

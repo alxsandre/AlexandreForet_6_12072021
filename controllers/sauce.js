@@ -28,21 +28,33 @@ exports.modifyLike = async (req, res, next) => {
     let usersDisliked = sauce.usersDisliked;
     const userAlreadyLiked = usersLiked.includes(userId);
     const userAlreadyDisliked = usersDisliked.includes(userId);
+    if ((req.body.like === 1 && userAlreadyLiked) || (req.body.like === -1 && userAlreadyDisliked)) { 
+      return res.status(status.METHOD_NOT_ALLOWED).json({ message: 'interdit!!!'});
+    }
     if (req.body.like === 1 && !userAlreadyLiked) {
       likes = likes + 1;
       usersLiked = [...usersLiked, userId];
-    } else if (!req.body.like) {
-      if (userAlreadyLiked) {
-        likes = likes - 1;
-        usersLiked = usersLiked.filter(usersId => usersId !== userId);
-      }
       if (userAlreadyDisliked) {
-        dislikes = dislikes - 1;
+        dislikes--;
         usersDisliked = usersDisliked.filter(usersId => usersId !== userId);
       }
+    } else if (!req.body.like) {
+      if (userAlreadyLiked) {
+        likes--;
+        usersLiked = usersLiked.filter(usersId => usersId !== userId);
+      } else if (userAlreadyDisliked) {
+        dislikes--;
+        usersDisliked = usersDisliked.filter(usersId => usersId !== userId);
+      } else {
+        return res.status(status.METHOD_NOT_ALLOWED).json({ message: 'interdit!!!'});
+      }
     } else if (req.body.like === -1 && !userAlreadyDisliked) {
-        dislikes = dislikes + 1;
+        dislikes++;
         usersDisliked = [...usersDisliked, userId];
+        if (userAlreadyLiked) {
+          likes--;
+          usersLiked = usersLiked.filter(usersId => usersId !== userId);
+        }
     };
     await Sauce.updateOne({ _id: req.params.id }, { likes, dislikes,  usersLiked, usersDisliked, _id: req.params.id})
     return res.status(status.OK).json({ message: 'Objet modifié!'});

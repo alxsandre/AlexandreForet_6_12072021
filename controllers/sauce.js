@@ -32,7 +32,7 @@ exports.modifyLike = async (req, res, next) => {
       return res.status(status.METHOD_NOT_ALLOWED).json({ message: 'interdit!!!'});
     }
     if (req.body.like === 1 && !userAlreadyLiked) {
-      likes = likes + 1;
+      likes++;
       usersLiked = [...usersLiked, userId];
       if (userAlreadyDisliked) {
         dislikes--;
